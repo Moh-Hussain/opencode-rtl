@@ -16,6 +16,8 @@
 
 ![OpenCode RTL](media/screenshot.png)
 
+![OpenCode RTL chat interface](media/screenshot-chat.png)
+
 <div dir="rtl" align="right">
 
 ## لماذا OpenCode RTL؟
