@@ -17,6 +17,7 @@ export function Composer() {
   const { state, t, dispatch, post, view } = useApp();
   const textarea = useRef<HTMLTextAreaElement>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const busy = state.status.type === "busy" || state.status.type === "retry";
   const connected = state.connection.phase === "ready" || state.connection.phase === "external";
   const text = state.composerText;
@@ -49,6 +50,61 @@ export function Composer() {
   useEffect(() => {
     if (!state.sessionsOpen && !state.settingsOpen && !state.picker) setAttachOpen(false);
   }, [state.sessionsOpen, state.settingsOpen, state.picker]);
+
+  const addFiles = (incoming: File[]) => {
+    const maxSize = 20 * 1024 * 1024;
+    const files = incoming.filter((file) => file.size > 0).slice(0, 12);
+    if (!files.length) return;
+    const oversized = files.find((file) => file.size > maxSize);
+    if (oversized) {
+      post({ type: "showToast", kind: "warn", message: t("composer.attachTooLarge", { name: oversized.name }) });
+    }
+    const accepted = files.filter((file) => file.size <= maxSize);
+    if (!accepted.length) return;
+    void Promise.all(
+      accepted.map(
+        (file) =>
+          new Promise<{ name: string; mime: string; data: string } | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = typeof reader.result === "string" ? reader.result : "";
+              const comma = result.indexOf(",");
+              if (comma < 0) return resolve(null);
+              resolve({
+                name: file.name || `pasted-${Date.now()}`,
+                mime: file.type || "application/octet-stream",
+                data: result.slice(comma + 1),
+              });
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          }),
+      ),
+    ).then((items) => {
+      const payload = items.filter(Boolean) as Array<{ name: string; mime: string; data: string }>;
+      if (payload.length) post({ type: "attachData", files: payload });
+    });
+  };
+
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      const data = event.clipboardData;
+      if (!data?.types?.includes("Files")) return;
+      const files = Array.from(data.files || []);
+      if (!files.length) {
+        for (const item of Array.from(data.items || [])) {
+          if (item.kind !== "file") continue;
+          const file = item.getAsFile();
+          if (file) files.push(file);
+        }
+      }
+      if (!files.length) return;
+      event.preventDefault();
+      addFiles(files);
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [post, t]);
 
   const execute = (command: string) => {
     dispatch({ type: "local:composer", text: "" });
@@ -127,7 +183,29 @@ export function Composer() {
   };
 
   return (
-    <div class={`composer-dock ${busy ? "is-busy" : ""}`}>
+    <div
+      class={`composer-dock ${busy ? "is-busy" : ""} ${dragging ? "is-dragging" : ""}`}
+      onDragOver={(event) => {
+        if (Array.from(event.dataTransfer?.types || []).includes("Files")) {
+          event.preventDefault();
+          setDragging(true);
+        }
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDragging(false);
+        addFiles(Array.from(event.dataTransfer?.files || []));
+      }}
+    >
+      {dragging ? (
+        <div class="composer-drop">
+          <Icon name="clip" size={16} />
+          <span>{t("composer.dropHint")}</span>
+        </div>
+      ) : null}
       <div class="composer-shell">
         {slashQuery !== null ? (
           <div class="slash-menu" role="listbox" aria-label={t("slash.title")}>

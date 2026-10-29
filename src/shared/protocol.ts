@@ -53,8 +53,10 @@ export type ClientMessage =
   | { type: "openFile"; path: string; line?: number; endLine?: number }
   | { type: "openUrl"; url: string }
   | { type: "pickFiles"; kind: "file" | "image" }
+  | { type: "attachData"; files: Array<{ name: string; mime: string; data: string }> }
   | { type: "attachSelection" }
   | { type: "attachActiveFile" }
+  | { type: "toggleTodo"; index: number }
   | { type: "getDiff"; sessionId: string }
   | { type: "log"; level: "debug" | "info" | "warn" | "error"; message: string }
   | { type: "showToast"; kind: "info" | "success" | "warn" | "error"; message: string };

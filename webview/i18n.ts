@@ -64,6 +64,8 @@ const ar: Dict = {
   "composer.attachImage": "إرفاق صورة",
   "composer.attachSelection": "إرفاق التحديد الحالي",
   "composer.attachHint": "إرفاق",
+  "composer.attachTooLarge": "الملف «{name}» أكبر من 20 ميجابايت وتم تجاهله",
+  "composer.dropHint": "أفلت الملفات هنا لإرفاقها",
   "composer.hintEnter": "Enter للإرسال · Shift+Enter لسطر جديد",
   "composer.hintCtrlEnter": "Ctrl/⌘+Enter للإرسال · Enter لسطر جديد",
   "composer.disconnected": "الاتصال غير جاهز — أعد المحاولة أولاً",
@@ -156,6 +158,7 @@ const ar: Dict = {
   "todo.completed": "مكتمل",
   "todo.cancelled": "ملغي",
   "todo.progress": "أنجزت {done} من {total}",
+  "todo.toggleHint": "اضغط لتعليم المهمة كمكتملة أو إرجاعها",
 
   "toast.copied": "تم النسخ إلى الحافظة",
   "toast.inserted": "تم الإدراج في المحرر",
@@ -309,6 +312,8 @@ const en: Dict = {
   "composer.attachImage": "Attach image",
   "composer.attachSelection": "Attach current selection",
   "composer.attachHint": "Attach",
+  "composer.attachTooLarge": "\"{name}\" is larger than 20 MB and was skipped",
+  "composer.dropHint": "Drop files here to attach",
   "composer.hintEnter": "Enter to send · Shift+Enter for a new line",
   "composer.hintCtrlEnter": "Ctrl/⌘+Enter to send · Enter for a new line",
   "composer.disconnected": "Not connected — retry first",
@@ -401,6 +406,7 @@ const en: Dict = {
   "todo.completed": "Completed",
   "todo.cancelled": "Cancelled",
   "todo.progress": "{done} of {total} done",
+  "todo.toggleHint": "Click to mark this task complete or reopen it",
 
   "toast.copied": "Copied to clipboard",
   "toast.inserted": "Inserted into the editor",

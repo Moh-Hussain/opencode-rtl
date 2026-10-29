@@ -33,6 +33,7 @@
   "config.defaultAgent": "Default agent name. Leave empty to use the OpenCode default.",
   "config.showReasoning": "Show the model's reasoning blocks expanded by default.",
   "config.autoAttachSelection": "Attach the current editor selection as context when opening the chat.",
+  "config.autoCompletePlan": "Mark the remaining plan items as complete when the agent finishes a turn. Many models do not update the todo list themselves. You can still click any task to reopen it.",
   "config.sendKey": "Keyboard shortcut used to send a message.",
   "config.sendKey.enter": "Enter to send",
   "config.sendKey.ctrlEnter": "Ctrl/Cmd+Enter to send",

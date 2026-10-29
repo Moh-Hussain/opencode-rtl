@@ -2449,8 +2449,19 @@ body.vscode-dark .hljs-property {
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  width: 100%;
   padding: 3px 0;
+  color: inherit;
+  font: inherit;
   font-size: 10.5px;
+  text-align: start;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.todos-item:hover .todos-text {
+  color: var(--text);
 }
 
 .todos-status {
@@ -2506,6 +2517,28 @@ body.vscode-dark .hljs-property {
 .composer-shell:focus-within {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow: 0 0 0 3px var(--accent-softer), var(--shadow-sm);
+}
+
+.composer-dock.is-dragging .composer-shell {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.composer-drop {
+  position: absolute;
+  inset: -4px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--accent-deep);
+  font-size: 11px;
+  font-weight: 650;
+  background: color-mix(in srgb, var(--accent-softer) 88%, transparent);
+  border: 1.5px dashed var(--accent);
+  border-radius: 17px;
+  pointer-events: none;
 }
 
 .composer {

@@ -2,7 +2,7 @@
   "name": "opencode-rtl",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "mohamdhussein",
   "license": "MIT",
   "repository": {
@@ -315,6 +315,12 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "%config.autoAttachSelection%",
+          "scope": "window"
+        },
+        "opencodeRtl.autoCompletePlan": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%config.autoCompletePlan%",
           "scope": "window"
         },
         "opencodeRtl.sendKey": {

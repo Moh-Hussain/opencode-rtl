@@ -14,9 +14,9 @@
 
 </div>
 
-![OpenCode RTL](media/screenshot.png)
+![OpenCode RTL](https://raw.githubusercontent.com/Moh-Hussain/opencode-rtl/main/media/screenshot.png)
 
-![OpenCode RTL chat interface](media/screenshot-chat.png)
+![OpenCode RTL chat interface](https://raw.githubusercontent.com/Moh-Hussain/opencode-rtl/main/media/screenshot-chat.png)
 
 <div dir="rtl" align="right">
 
@@ -80,6 +80,7 @@ code --install-extension opencode-rtl-0.1.0.vsix
 - تصدير المحادثة إلى Markdown.
 - حجم خط، اتجاه، لغة، ومفتاح إرسال قابلة للتخصيص.
 - إرفاق التحديد من المحرر أو إرساله مباشرة كسؤال.
+- لصق الصور والملفات أو سحبها وإفلاتها داخل المحادثة مباشرة.
 
 ## الأوامر
 
@@ -121,6 +122,7 @@ code --install-extension opencode-rtl-0.1.0.vsix
 | `opencodeRtl.defaultAgent` | `""` | وكيل افتراضي، مثال: `build` |
 | `opencodeRtl.showReasoning` | `false` | إظهار بطاقات التفكير افتراضياً |
 | `opencodeRtl.autoAttachSelection` | `true` | إرفاق التحديد تلقائياً عند فتح المحادثة |
+| `opencodeRtl.autoCompletePlan` | `true` | تعليم خطة العمل كمكتملة عند انتهاء دور الوكيل (اضغط أي مهمة لإرجاعها) |
 | `opencodeRtl.sendKey` | `"enter"` | الإرسال بـ Enter أو Ctrl/Cmd+Enter |
 | `opencodeRtl.openIn` | `"sidebar"` | مكان الفتح الافتراضي: الشريط الجانبي أو اللوحة |
 
@@ -157,6 +159,7 @@ Direction, typography, navigation, tool and permission cards, and conversation f
 - Sidebar and editor panel share the same session state.
 - Session search, fork, delete, Markdown export, model/agent pickers, and todos.
 - File diff viewer, inline permission cards, and editor selection actions.
+- Paste or drag and drop images and files straight into the chat.
 - Slash commands: `/new`, `/clear`, `/export`, `/model`, `/agent`, `/rtl`, `/settings`.
 
 ## Requirements
@@ -204,7 +207,7 @@ All commands are also available from the Command Palette and the editor context 
 
 ## Settings
 
-See the Arabic settings table above for the full list. Main options: `serverUrl`, `autoStartServer`, `executable`, `serverPassword`, `language`, `direction`, `fontSize`, `defaultModel`, `defaultAgent`, `showReasoning`, `autoAttachSelection`, `sendKey`, and `openIn`.
+See the Arabic settings table above for the full list. Main options: `serverUrl`, `autoStartServer`, `executable`, `serverPassword`, `language`, `direction`, `fontSize`, `defaultModel`, `defaultAgent`, `showReasoning`, `autoAttachSelection`, `autoCompletePlan`, `sendKey`, and `openIn`.
 
 ## Development
 

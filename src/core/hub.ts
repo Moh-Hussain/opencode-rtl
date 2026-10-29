@@ -55,8 +55,27 @@ const MIME: Record<string, string> = {
 
 const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]);
 
+const EXT_FOR_MIME: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/svg+xml": ".svg",
+  "application/pdf": ".pdf",
+  "text/plain": ".txt",
+  "text/markdown": ".md",
+  "application/json": ".json",
+};
+
 function mimeFor(file: string): string {
   return MIME[path.extname(file).toLowerCase()] || "application/octet-stream";
+}
+
+function safeFileName(name: string, mime: string): string {
+  const base = path.basename((name || "").replace(/\\/g, "/")).replace(/[^\w.\-() \u0600-\u06FF]/g, "_").trim();
+  const cleaned = base.slice(0, 100) || `paste-${Date.now()}`;
+  if (path.extname(cleaned)) return cleaned;
+  return `${cleaned}${EXT_FOR_MIME[mime] || ""}`;
 }
 
 function messageText(error: unknown): string {
@@ -98,6 +117,8 @@ export class ChatHub implements vscode.Disposable {
   private refreshTimer?: NodeJS.Timeout;
   private draft?: { id: string; text?: string; attachments?: Attachment[]; focus?: boolean; sessionId?: string };
   private draftTimer?: NodeJS.Timeout;
+  private suppressAutoComplete = false;
+  private turnActive = false;
   private readonly stateEmitter = new vscode.EventEmitter<void>();
   private readonly openEmitter = new vscode.EventEmitter<"sidebar" | "panel">();
   private readonly changeSets = new Map<string, SessionDiffFile[]>();
@@ -250,6 +271,12 @@ export class ChatHub implements vscode.Disposable {
       }
       case "pickFiles":
         await this.pickFiles(message.kind);
+        break;
+      case "attachData":
+        await this.attachData(message.files);
+        break;
+      case "toggleTodo":
+        this.toggleTodo(message.index);
         break;
       case "attachSelection":
         await this.attachSelection(false);
@@ -463,10 +490,11 @@ export class ChatHub implements vscode.Disposable {
       api.statuses().catch(() => ({}) as Record<string, SessionStatus>),
     ]);
     this.messages = messages;
-    this.todos = todos;
+    this.todos = this.resolveTodos(sessionId, todos);
     this.permissions = permissions;
     this.questions = questions;
     this.status = statuses[sessionId] || { type: "idle" };
+    this.turnActive = this.status.type === "busy" || this.status.type === "retry";
     this.deps.context.workspaceState.update("opencodeRtl.session", sessionId);
     this.changed();
   }
@@ -488,6 +516,7 @@ export class ChatHub implements vscode.Disposable {
 
   async newSession(title?: string): Promise<void> {
     const api = this.requireApi();
+    this.turnActive = false;
     this.status = { type: "idle" };
     const session = await api.createSession({
       title,
@@ -511,6 +540,7 @@ export class ChatHub implements vscode.Disposable {
     if (this.current?.id === id) return;
     const session = this.sessions.find((entry) => entry.id === id) || toSessionSummary(await this.requireApi().session(id));
     this.current = session;
+    this.turnActive = false;
     this.messages = [];
     this.todos = [];
     this.status = { type: "idle" };
@@ -583,6 +613,8 @@ export class ChatHub implements vscode.Disposable {
     if (!this.current) throw new Error("Could not create a session");
 
     const parts = await this.buildPrompt(text, attachments);
+    this.suppressAutoComplete = false;
+    this.turnActive = true;
     this.status = { type: "busy" };
     this.broadcast({ type: "status", payload: { sessionId: this.current.id, status: this.status } });
     this.changed();
@@ -591,6 +623,7 @@ export class ChatHub implements vscode.Disposable {
       await api.prompt(this.current.id, parts, { model: this.selectedModel, agent: this.selectedAgent });
       this.draft = undefined;
     } catch (error) {
+      this.turnActive = false;
       this.status = { type: "idle" };
       this.broadcast({ type: "status", payload: { sessionId: this.current.id, status: this.status } });
       this.broadcast({ type: "error", payload: { message: messageText(error) } });
@@ -624,6 +657,8 @@ export class ChatHub implements vscode.Disposable {
 
   async abort(): Promise<void> {
     if (!this.current) return;
+    this.suppressAutoComplete = true;
+    this.turnActive = false;
     await this.requireApi().abort(this.current.id);
     this.status = { type: "idle" };
     this.broadcast({ type: "status", payload: { sessionId: this.current.id, status: this.status } });
@@ -635,12 +670,16 @@ export class ChatHub implements vscode.Disposable {
   // ---------------------------------------------------------------------
 
   async replyPermission(requestId: string, reply: "once" | "always" | "reject", message?: string): Promise<void> {
+    if (reply !== "reject") this.turnActive = true;
+    this.suppressAutoComplete = false;
     await this.requireApi().replyPermission(requestId, reply, message);
     this.permissions = this.permissions.filter((entry) => entry.id !== requestId);
     if (this.current) this.broadcast({ type: "permissions", payload: { sessionId: this.current.id, requests: this.permissions } });
   }
 
   async replyQuestion(requestId: string, answers: string[][]): Promise<void> {
+    this.turnActive = true;
+    this.suppressAutoComplete = false;
     await this.requireApi().replyQuestion(requestId, answers);
     this.questions = this.questions.filter((entry) => entry.id !== requestId);
     if (this.current) this.broadcast({ type: "questions", payload: { sessionId: this.current.id, requests: this.questions } });
@@ -820,6 +859,115 @@ export class ChatHub implements vscode.Disposable {
       attachments.push(attachment);
     }
     if (attachments.length) this.pushDraft({ attachments, focus: true });
+  }
+
+  async attachData(files: Array<{ name: string; mime: string; data: string }>): Promise<void> {
+    if (!Array.isArray(files) || !files.length) return;
+    const maxFile = 20 * 1024 * 1024;
+    const dir = vscode.Uri.joinPath(this.deps.context.globalStorageUri, "attachments");
+    await vscode.workspace.fs.createDirectory(dir);
+    const attachments: Attachment[] = [];
+    for (const file of files.slice(0, 12)) {
+      const mime = (file.mime || "application/octet-stream").toLowerCase();
+      let bytes: Buffer;
+      try {
+        bytes = Buffer.from(String(file.data || ""), "base64");
+      } catch {
+        continue;
+      }
+      if (!bytes.length) continue;
+      if (bytes.length > maxFile) {
+        this.broadcast({
+          type: "toast",
+          payload: { kind: "warn", message: `${file.name || "File"} is larger than 20 MB and was skipped` },
+        });
+        continue;
+      }
+      const name = safeFileName(file.name, mime);
+      const target = vscode.Uri.joinPath(dir, `${Date.now()}-${randomUUID().slice(0, 8)}-${name}`);
+      try {
+        await vscode.workspace.fs.writeFile(target, bytes);
+      } catch (error) {
+        this.output(`[hub] could not store attachment: ${messageText(error)}`);
+        continue;
+      }
+      const extension = path.extname(name).toLowerCase();
+      const kind = mime.startsWith("image/") || IMAGE_EXT.has(extension) ? "image" : "file";
+      const attachment: Attachment = {
+        id: randomUUID(),
+        kind,
+        name,
+        path: target.fsPath,
+        mime: mime.startsWith("image/") ? mime : mimeFor(name),
+      };
+      if (kind === "image" && bytes.length < 3_000_000) {
+        attachment.preview = `data:${attachment.mime};base64,${bytes.toString("base64")}`;
+      }
+      attachments.push(attachment);
+    }
+    if (attachments.length) this.pushDraft({ attachments, focus: true });
+  }
+
+  private todoKey(sessionId: string): string {
+    return `opencodeRtl.todos.${sessionId}`;
+  }
+
+  private resolveTodos(sessionId: string, incoming: TodoItem[]): TodoItem[] {
+    const stored = this.deps.context.workspaceState.get<TodoItem[]>(this.todoKey(sessionId));
+    if (!stored || !stored.length) return incoming;
+    if (stored.length !== incoming.length) {
+      void this.deps.context.workspaceState.update(this.todoKey(sessionId), undefined);
+      return incoming;
+    }
+    const samePlan = stored.every((entry, index) => entry.content === incoming[index]?.content);
+    if (!samePlan) {
+      void this.deps.context.workspaceState.update(this.todoKey(sessionId), undefined);
+      return incoming;
+    }
+    const storedDone = stored.filter((entry) => entry.status === "completed").length;
+    const incomingDone = incoming.filter((entry) => entry.status === "completed").length;
+    if (incomingDone >= storedDone) {
+      if (incomingDone === incoming.length) {
+        void this.deps.context.workspaceState.update(this.todoKey(sessionId), undefined);
+      }
+      return incoming;
+    }
+    return stored;
+  }
+
+  private persistTodos() {
+    const sessionId = this.current?.id;
+    if (!sessionId || !this.todos.length) return;
+    void this.deps.context.workspaceState.update(this.todoKey(sessionId), this.todos);
+  }
+
+  private toggleTodo(index: number): void {
+    if (!this.current) return;
+    const todo = this.todos[index];
+    if (!todo) return;
+    this.suppressAutoComplete = true;
+    this.todos = this.todos.map((entry, position) =>
+      position === index ? { ...entry, status: entry.status === "completed" ? "pending" : "completed" } : entry,
+    );
+    this.persistTodos();
+    this.broadcast({ type: "todos", payload: { sessionId: this.current.id, todos: this.todos } });
+    this.changed();
+  }
+
+  private autoCompleteTodos(): void {
+    const sessionId = this.current?.id;
+    if (!sessionId) return;
+    if (!this.turnActive) return;
+    if (!this.config().get<boolean>("autoCompletePlan")) return;
+    if (this.suppressAutoComplete) return;
+    if (!this.todos.length || this.todos.every((entry) => entry.status === "completed")) return;
+    if (this.questions.some((entry) => entry.sessionID === sessionId)) return;
+    if (this.permissions.some((entry) => entry.sessionID === sessionId)) return;
+    this.todos = this.todos.map((entry) =>
+      entry.status === "completed" || entry.status === "cancelled" ? entry : { ...entry, status: "completed" },
+    );
+    this.persistTodos();
+    this.broadcast({ type: "todos", payload: { sessionId, todos: this.todos } });
   }
 
   private editorContext(): { selection?: SelectionPayload; file?: { path: string; name: string } } | undefined {
@@ -1163,22 +1311,33 @@ export class ChatHub implements vscode.Disposable {
       case "session.status": {
         this.status = props.status || { type: "idle" };
         this.broadcast({ type: "status", payload: { sessionId: this.current?.id || "", status: this.status } });
+        if (this.status.type === "idle") {
+          this.autoCompleteTodos();
+          this.turnActive = false;
+        }
         this.changed();
         break;
       }
       case "session.idle": {
         this.status = { type: "idle" };
         this.broadcast({ type: "status", payload: { sessionId: this.current?.id || "", status: this.status } });
+        this.autoCompleteTodos();
+        this.turnActive = false;
         this.changed();
         void this.syncHistory();
         break;
       }
       case "todo.updated": {
-        this.todos = Array.isArray(props.todos) ? props.todos : [];
-        this.broadcast({ type: "todos", payload: { sessionId: this.current?.id || "", todos: this.todos } });
+        const incoming = Array.isArray(props.todos) ? props.todos : [];
+        const sessionId = this.current?.id || "";
+        if (sessionId) void this.deps.context.workspaceState.update(this.todoKey(sessionId), undefined);
+        this.todos = incoming;
+        this.broadcast({ type: "todos", payload: { sessionId, todos: this.todos } });
         break;
       }
       case "session.error": {
+        this.suppressAutoComplete = true;
+        this.turnActive = false;
         this.status = { type: "idle" };
         this.broadcast({ type: "status", payload: { sessionId: this.current?.id || "", status: this.status } });
         break;
@@ -1216,7 +1375,7 @@ export class ChatHub implements vscode.Disposable {
       // overwrite the live transcript in that case.
       if (this.status.type !== "idle") return;
       this.messages = messages;
-      this.todos = todos;
+      this.todos = this.resolveTodos(session.id, todos);
       this.status = statuses[session.id] || { type: "idle" };
       this.broadcast({ type: "history", payload: this.historyPayload(session.id) });
       this.changed();

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-29
+
+- Paste or drag and drop images and files directly into the chat composer.
+- Plan tasks now complete automatically when a turn finishes, and any task can be clicked to reopen or re-complete it.
+- Added the `opencodeRtl.autoCompletePlan` setting to control automatic plan completion.
+- Fixed README screenshots not being included in the packaged extension.
+
 ## 0.1.0 — 2026-10-29
 
 - Initial release of OpenCode RTL for VS Code and Antigravity.

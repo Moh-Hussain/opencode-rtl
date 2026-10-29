@@ -282,7 +282,7 @@ export function QuestionCard({ request }: { request: QuestionRequest }) {
 }
 
 export function TodoStrip() {
-  const { state, t, view } = useApp();
+  const { state, t, view, post } = useApp();
   const [open, setOpen] = useState(false);
   const todos = state.todos;
   if (!todos.length) return null;
@@ -304,7 +304,14 @@ export function TodoStrip() {
           </div>
           <ul>
             {todos.map((todo, index) => (
-              <li key={index} class={`todos-item status-${todo.status}`}>
+              <button
+                type="button"
+                key={index}
+                class={`todos-item status-${todo.status}`}
+                title={t("todo.toggleHint")}
+                aria-pressed={todo.status === "completed"}
+                onClick={() => post({ type: "toggleTodo", index })}
+              >
                 <span class="todos-status">
                   <Icon
                     name={todo.status === "completed" ? "check-circle" : todo.status === "in_progress" ? "clock" : "circle"}
@@ -313,7 +320,7 @@ export function TodoStrip() {
                 </span>
                 <span class="todos-text">{todo.content}</span>
                 {todo.priority === "high" ? <span class="todos-prio">{todo.priority}</span> : null}
-              </li>
+              </button>
             ))}
           </ul>
         </div>

@@ -33,6 +33,7 @@
   "config.defaultAgent": "اسم الوكيل الافتراضي. اتركه فارغاً لاستخدام افتراضي OpenCode.",
   "config.showReasoning": "إظهار تفكير النموذج موسّعاً بشكل افتراضي.",
   "config.autoAttachSelection": "إرفاق تحديد المحرر الحالي كسياق عند فتح المحادثة.",
+  "config.autoCompletePlan": "تعليم مهام خطة العمل المتبقية كمكتملة عند انتهاء دور الوكيل. كثير من النماذج لا تحدّث قائمة المهام بنفسها. يمكنك الضغط على أي مهمة لإرجاعها.",
   "config.sendKey": "اختصار لوحة المفاتيح لإرسال الرسالة.",
   "config.sendKey.enter": "Enter للإرسال",
   "config.sendKey.ctrlEnter": "Ctrl/Cmd+Enter للإرسال",
