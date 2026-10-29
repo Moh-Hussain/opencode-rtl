@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; background: #ddd; }
+      iframe { display: block; width: 360px; height: 820px; border: 0; }
+    </style>
+  </head>
+  <body>
+    <iframe id="frame"></iframe>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const frame = document.getElementById("frame");
+      frame.src = "preview.html?" + (params.get("q") || "view=sidebar&theme=light");
+      if (params.has("debug")) {
+        setTimeout(() => {
+          document.title = "outer=" + innerWidth + " frame=" + frame.contentDocument.documentElement.scrollWidth + "x" + frame.contentWindow.innerWidth + " || " + frame.contentDocument.title;
+        }, 2200);
+      }
+    </script>
+  </body>
+</html>

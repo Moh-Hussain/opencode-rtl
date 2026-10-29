@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>OpenCode RTL preview</title>
+    <link rel="stylesheet" href="dist/webview.css" />
+  </head>
+  <body data-view="panel">
+    <div id="root"></div>
+    <script src="dist/webview.js"></script>
+    <script>
+      const previewParams = new URLSearchParams(location.search);
+      if (previewParams.has("open")) {
+        setTimeout(() => {
+          const which = previewParams.get("open");
+          if (which === "settings") document.querySelector(".header-settings")?.click();
+          if (which === "model" || which === "agent") document.querySelector(".chip-model")?.click();
+          if (which === "sessions") document.querySelector('[aria-label="المحادثات"]')?.click();
+          if (which === "diff" || which === "diff-expanded") {
+            document.querySelector(".menu-wrap .icon-btn")?.click();
+            setTimeout(() => {
+              const item = [...document.querySelectorAll(".menu button")].find((button) => button.textContent.includes("تغييرات") || button.textContent.includes("Changes"));
+              item?.click();
+              if (which === "diff-expanded") {
+                setTimeout(() => document.querySelector(".diff-file-toggle")?.click(), 180);
+              }
+            }, 120);
+          }
+        }, 500);
+      }
+      if (new URLSearchParams(location.search).has("debug")) {
+        setTimeout(() => {
+          const bad = [];
+          document.querySelectorAll("*").forEach((el) => {
+            if (el.scrollWidth - el.clientWidth > 2 && getComputedStyle(el).overflowX !== "auto" && getComputedStyle(el).overflowX !== "scroll") {
+              bad.push(`${el.tagName}.${el.className || ""} sw=${el.scrollWidth} cw=${el.clientWidth}`);
+            }
+          });
+          const rect = (sel) => { const r = document.querySelector(sel)?.getBoundingClientRect(); return r ? `${sel}:${Math.round(r.left)},${Math.round(r.right)},w${Math.round(r.width)}` : `${sel}:?`; };
+          document.title = `doc=${document.documentElement.scrollWidth}x${innerWidth} body=${document.body.scrollWidth} | ` + [rect(".header"), rect(".header-start"), rect(".header-actions"), rect(".app"), rect(".permission-patterns"), rect(".permission-patterns code"), rect(".question")].join(" | ") + " || " + bad.slice(0, 10).join(" || ");
+        }, 700);
+      }
+    </script>
+  </body>
+</html>

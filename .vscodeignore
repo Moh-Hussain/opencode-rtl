@@ -1,0 +1,12 @@
+**
+!package.json
+!package.nls.json
+!package.nls.ar.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!dist/extension.js
+!dist/webview.js
+!dist/webview.css
+!media/icon.png
+!media/activity.svg

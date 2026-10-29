@@ -1,0 +1,374 @@
+{
+  "name": "opencode-rtl",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.1.0",
+  "publisher": "mohamdhussein",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moh-Hussain/opencode-rtl.git"
+  },
+  "homepage": "https://github.com/Moh-Hussain/opencode-rtl#readme",
+  "bugs": {
+    "url": "https://github.com/Moh-Hussain/opencode-rtl/issues"
+  },
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Other"
+  ],
+  "keywords": [
+    "opencode",
+    "rtl",
+    "arabic",
+    "عربي",
+    "ai",
+    "chat",
+    "assistant",
+    "agent"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onWebviewPanel:opencodeRtl.chatPanel"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "opencodeRtl",
+          "title": "%container.title%",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "opencodeRtl": [
+        {
+          "id": "opencodeRtl.chat",
+          "name": "%view.chat.name%",
+          "type": "webview",
+          "icon": "media/activity.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "opencodeRtl.chat",
+        "contents": "%view.chat.welcome%"
+      }
+    ],
+    "commands": [
+      {
+        "command": "opencodeRtl.openChat",
+        "title": "%command.openChat%",
+        "category": "OpenCode RTL",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "opencodeRtl.openPanel",
+        "title": "%command.openPanel%",
+        "category": "OpenCode RTL",
+        "icon": "$(screen-full)"
+      },
+      {
+        "command": "opencodeRtl.newSession",
+        "title": "%command.newSession%",
+        "category": "OpenCode RTL",
+        "icon": "$(add)"
+      },
+      {
+        "command": "opencodeRtl.sendSelection",
+        "title": "%command.sendSelection%",
+        "category": "OpenCode RTL"
+      },
+      {
+        "command": "opencodeRtl.explainSelection",
+        "title": "%command.explainSelection%",
+        "category": "OpenCode RTL"
+      },
+      {
+        "command": "opencodeRtl.fixSelection",
+        "title": "%command.fixSelection%",
+        "category": "OpenCode RTL"
+      },
+      {
+        "command": "opencodeRtl.toggleDirection",
+        "title": "%command.toggleDirection%",
+        "category": "OpenCode RTL",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "opencodeRtl.pickModel",
+        "title": "%command.pickModel%",
+        "category": "OpenCode RTL",
+        "icon": "$(chip)"
+      },
+      {
+        "command": "opencodeRtl.pickAgent",
+        "title": "%command.pickAgent%",
+        "category": "OpenCode RTL",
+        "icon": "$(person)"
+      },
+      {
+        "command": "opencodeRtl.restartServer",
+        "title": "%command.restartServer%",
+        "category": "OpenCode RTL",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "opencodeRtl.openSettings",
+        "title": "%command.openSettings%",
+        "category": "OpenCode RTL",
+        "icon": "$(gear)"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "opencodeRtl.editorSubmenu",
+        "label": "%submenu.editor%",
+        "icon": "$(sparkle)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "opencodeRtl.editorSubmenu",
+          "group": "navigation@90",
+          "when": "editorTextFocus"
+        }
+      ],
+      "opencodeRtl.editorSubmenu": [
+        {
+          "command": "opencodeRtl.sendSelection",
+          "group": "1_send@1"
+        },
+        {
+          "command": "opencodeRtl.explainSelection",
+          "group": "2_ask@1"
+        },
+        {
+          "command": "opencodeRtl.fixSelection",
+          "group": "2_ask@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "opencodeRtl.newSession",
+          "group": "navigation@1",
+          "when": "view == opencodeRtl.chat"
+        },
+        {
+          "command": "opencodeRtl.openPanel",
+          "group": "navigation@2",
+          "when": "view == opencodeRtl.chat"
+        },
+        {
+          "command": "opencodeRtl.pickModel",
+          "group": "navigation@3",
+          "when": "view == opencodeRtl.chat"
+        },
+        {
+          "command": "opencodeRtl.restartServer",
+          "group": "9_tools@1",
+          "when": "view == opencodeRtl.chat"
+        },
+        {
+          "command": "opencodeRtl.openSettings",
+          "group": "9_tools@2",
+          "when": "view == opencodeRtl.chat"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "opencodeRtl.openPanel",
+          "when": "true"
+        },
+        {
+          "command": "opencodeRtl.sendSelection",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "opencodeRtl.explainSelection",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "opencodeRtl.fixSelection",
+          "when": "editorTextFocus"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "opencodeRtl.openChat",
+        "key": "ctrl+alt+o",
+        "mac": "cmd+alt+o"
+      },
+      {
+        "command": "opencodeRtl.toggleDirection",
+        "key": "ctrl+alt+r",
+        "mac": "cmd+alt+r"
+      },
+      {
+        "command": "opencodeRtl.explainSelection",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "opencodeRtl.newSession",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n"
+      }
+    ],
+    "configuration": {
+      "title": "OpenCode RTL",
+      "properties": {
+        "opencodeRtl.serverUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "%config.serverUrl%",
+          "scope": "window"
+        },
+        "opencodeRtl.autoStartServer": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%config.autoStartServer%",
+          "scope": "window"
+        },
+        "opencodeRtl.executable": {
+          "type": "string",
+          "default": "opencode",
+          "markdownDescription": "%config.executable%",
+          "scope": "window"
+        },
+        "opencodeRtl.serverPassword": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "%config.serverPassword%",
+          "scope": "window"
+        },
+        "opencodeRtl.language": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "ar",
+            "en"
+          ],
+          "enumDescriptions": [
+            "%config.language.auto%",
+            "%config.language.ar%",
+            "%config.language.en%"
+          ],
+          "default": "auto",
+          "markdownDescription": "%config.language%",
+          "scope": "window"
+        },
+        "opencodeRtl.direction": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "rtl",
+            "ltr"
+          ],
+          "enumDescriptions": [
+            "%config.direction.auto%",
+            "%config.direction.rtl%",
+            "%config.direction.ltr%"
+          ],
+          "default": "auto",
+          "markdownDescription": "%config.direction%",
+          "scope": "window"
+        },
+        "opencodeRtl.fontSize": {
+          "type": "number",
+          "default": 14,
+          "minimum": 11,
+          "maximum": 22,
+          "markdownDescription": "%config.fontSize%",
+          "scope": "window"
+        },
+        "opencodeRtl.defaultModel": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "%config.defaultModel%",
+          "scope": "window"
+        },
+        "opencodeRtl.defaultAgent": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "%config.defaultAgent%",
+          "scope": "window"
+        },
+        "opencodeRtl.showReasoning": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%config.showReasoning%",
+          "scope": "window"
+        },
+        "opencodeRtl.autoAttachSelection": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%config.autoAttachSelection%",
+          "scope": "window"
+        },
+        "opencodeRtl.sendKey": {
+          "type": "string",
+          "enum": [
+            "enter",
+            "ctrlEnter"
+          ],
+          "enumDescriptions": [
+            "%config.sendKey.enter%",
+            "%config.sendKey.ctrlEnter%"
+          ],
+          "default": "enter",
+          "markdownDescription": "%config.sendKey%",
+          "scope": "window"
+        },
+        "opencodeRtl.openIn": {
+          "type": "string",
+          "enum": [
+            "sidebar",
+            "panel"
+          ],
+          "enumDescriptions": [
+            "%config.openIn.sidebar%",
+            "%config.openIn.panel%"
+          ],
+          "default": "sidebar",
+          "markdownDescription": "%config.openIn%",
+          "scope": "window"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p webview/tsconfig.json --noEmit",
+    "lint": "npm run typecheck",
+    "preview": "node scripts/preview.mjs",
+    "icon": "node scripts/make-icon.mjs",
+    "package": "npm run build && vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "preact": "^10.27.2"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.15.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
+  }
+}
