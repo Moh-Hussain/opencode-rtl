@@ -207,23 +207,57 @@ export function Icon({ name, size = 18, className }: { name: IconName; size?: nu
 export function Logo({ size = 30, glow = false }: { size?: number; glow?: boolean }) {
   return (
     <span class={`logo ${glow ? "logo-glow" : ""}`} style={{ width: `${size}px`, height: `${size}px` }}>
-      <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true">
-        <defs>
-          <linearGradient id="logo-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#F0996F" />
-            <stop offset="55%" stop-color="#E8734F" />
-            <stop offset="100%" stop-color="#C9522F" />
-          </linearGradient>
-        </defs>
-        <rect x="1" y="1" width="30" height="30" rx="9.5" fill="url(#logo-grad)" />
+      <svg viewBox="0 0 512 512" width={size} height={size} aria-hidden="true">
+        <rect width="512" height="512" rx="112" fill="#131010" />
+        <path d="M320 224V352H192V224H320Z" fill="#5A5858" />
         <path
-          d="M9 12.4C9 10.5 10.5 9 12.4 9h7.2C21.5 9 23 10.5 23 12.4v5.2c0 1.9-1.5 3.4-3.4 3.4h-5.3l-3.6 2.6v-2.6h-.3C10.5 21 9 19.5 9 17.6Z"
-          fill="#fff"
-          opacity="0.96"
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z"
+          fill="#FFFFFF"
         />
-        <circle cx="16" cy="15" r="2" fill="#E8734F" />
       </svg>
     </span>
+  );
+}
+
+export function Lightbox({ src, alt, onClose }: { src?: string; alt: string; onClose: () => void }) {
+  const { t } = useApp();
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div class="lightbox" role="dialog" aria-modal="true" onClick={onClose}>
+      <button
+        type="button"
+        class="lightbox-close"
+        aria-label={t("image.close")}
+        onClick={(event) => {
+          event.stopPropagation();
+          onClose();
+        }}
+      >
+        <Icon name="x" size={18} />
+      </button>
+      {src === undefined ? (
+        <div class="lightbox-loading">
+          <Spinner size={18} />
+          <span>{t("image.loading")}</span>
+        </div>
+      ) : src ? (
+        <img src={src} alt={alt} onClick={(event) => event.stopPropagation()} />
+      ) : (
+        <div class="lightbox-loading">
+          <Icon name="alert" size={18} />
+          <span>{t("image.failed")}</span>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -77,6 +77,11 @@ const ar: Dict = {
   "composer.lines": "أسطر",
   "composer.sendFailed": "تعذّر إرسال الرسالة",
 
+  "image.preview": "عرض الصورة",
+  "image.loading": "جارٍ تحميل الصورة…",
+  "image.failed": "تعذّر عرض الصورة",
+  "image.close": "إغلاق",
+
   "sessions.title": "المحادثات",
   "sessions.new": "محادثة جديدة",
   "sessions.search": "ابحث في المحادثات…",
@@ -324,6 +329,11 @@ const en: Dict = {
   "composer.files": "file",
   "composer.lines": "lines",
   "composer.sendFailed": "Couldn't send the message",
+
+  "image.preview": "View image",
+  "image.loading": "Loading image…",
+  "image.failed": "Couldn't load the image",
+  "image.close": "Close",
 
   "sessions.title": "Chats",
   "sessions.new": "New chat",

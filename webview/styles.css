@@ -2018,8 +2018,29 @@ body.vscode-dark .hljs-property {
   width: 28px;
   height: 28px;
   flex: none;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 6px;
+}
+
+.attachment-thumb-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: var(--surface-2);
+  border: 0;
+  border-radius: 6px;
+}
+
+.attachment-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .attachment-icon {
@@ -3787,7 +3808,7 @@ body.vscode-dark .hljs-property {
 }
 
 .logo-glow {
-  filter: drop-shadow(0 8px 20px rgba(210, 90, 50, 0.3));
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.32));
 }
 
 /* sidebar refinements */
@@ -4137,4 +4158,56 @@ body.vscode-dark .hljs-property {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* image lightbox */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(10, 8, 7, 0.78);
+  backdrop-filter: blur(6px);
+  animation: fade 0.15s ease-out;
+  cursor: zoom-out;
+}
+
+.lightbox img {
+  display: block;
+  max-width: min(92vw, 1200px);
+  max-height: 86vh;
+  object-fit: contain;
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  cursor: default;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  inset-inline-end: 16px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.lightbox-loading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
 }

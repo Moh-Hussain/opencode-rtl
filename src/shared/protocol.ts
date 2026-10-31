@@ -56,6 +56,7 @@ export type ClientMessage =
   | { type: "attachData"; files: Array<{ name: string; mime: string; data: string }> }
   | { type: "attachSelection" }
   | { type: "attachActiveFile" }
+  | { type: "previewImage"; path: string }
   | { type: "toggleTodo"; index: number }
   | { type: "getDiff"; sessionId: string }
   | { type: "log"; level: "debug" | "info" | "warn" | "error"; message: string }
@@ -90,6 +91,7 @@ export type HostMessage =
   | { type: "todos"; payload: { sessionId: string; todos: TodoItem[] } }
   | { type: "diff"; payload: { sessionId: string; files: SessionDiffFile[] } }
   | { type: "draft"; payload: { id: string; text?: string; attachments?: Attachment[]; focus?: boolean; sessionId?: string } }
+  | { type: "imagePreview"; payload: { path: string; data: string } }
   | { type: "toast"; payload: { kind: "info" | "success" | "warn" | "error"; message: string } }
   | { type: "busy"; payload: { busy: boolean; label?: string } }
   | { type: "editorContext"; payload: { selection?: SelectionPayload; file?: { path: string; name: string } } }

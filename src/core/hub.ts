@@ -275,6 +275,9 @@ export class ChatHub implements vscode.Disposable {
       case "attachData":
         await this.attachData(message.files);
         break;
+      case "previewImage":
+        await this.previewImage(message.path);
+        break;
       case "toggleTodo":
         this.toggleTodo(message.index);
         break;
@@ -906,6 +909,29 @@ export class ChatHub implements vscode.Disposable {
       attachments.push(attachment);
     }
     if (attachments.length) this.pushDraft({ attachments, focus: true });
+  }
+
+  private async previewImage(filePath: string): Promise<void> {
+    const extension = path.extname(filePath).toLowerCase();
+    if (!IMAGE_EXT.has(extension)) return;
+    try {
+      const uri = vscode.Uri.file(filePath);
+      const info = await vscode.workspace.fs.stat(uri);
+      if (info.size > 25 * 1024 * 1024) {
+        this.broadcast({ type: "toast", payload: { kind: "warn", message: "Image is larger than 25 MB" } });
+        this.broadcast({ type: "imagePreview", payload: { path: filePath, data: "" } });
+        return;
+      }
+      const bytes = await vscode.workspace.fs.readFile(uri);
+      const mime = mimeFor(filePath);
+      this.broadcast({
+        type: "imagePreview",
+        payload: { path: filePath, data: `data:${mime};base64,${Buffer.from(bytes).toString("base64")}` },
+      });
+    } catch (error) {
+      this.output(`[hub] could not preview image: ${messageText(error)}`);
+      this.broadcast({ type: "imagePreview", payload: { path: filePath, data: "" } });
+    }
   }
 
   private todoKey(sessionId: string): string {

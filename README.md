@@ -81,6 +81,7 @@ code --install-extension opencode-rtl-0.1.0.vsix
 - حجم خط، اتجاه، لغة، ومفتاح إرسال قابلة للتخصيص.
 - إرفاق التحديد من المحرر أو إرساله مباشرة كسؤال.
 - لصق الصور والملفات أو سحبها وإفلاتها داخل المحادثة مباشرة.
+- الضغط على أي صورة في المحادثة يعرضها بالحجم الكامل دون مغادرة الواجهة.
 
 ## الأوامر
 
@@ -160,6 +161,7 @@ Direction, typography, navigation, tool and permission cards, and conversation f
 - Session search, fork, delete, Markdown export, model/agent pickers, and todos.
 - File diff viewer, inline permission cards, and editor selection actions.
 - Paste or drag and drop images and files straight into the chat.
+- Click any image in the chat to preview it full size without leaving the chat.
 - Slash commands: `/new`, `/clear`, `/export`, `/model`, `/agent`, `/rtl`, `/settings`.
 
 ## Requirements

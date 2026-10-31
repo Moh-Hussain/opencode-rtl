@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — 2026-10-31
+
+- Clicking an image in the chat now opens a full-size preview inside the chat instead of opening it in VS Code.
+- Added image previews for pasted and dropped attachments.
+- Replaced the extension icon, activity bar icon, and in-chat logo with the OpenCode logo.
+
 ## 0.1.1 — 2026-10-29
 
 - Paste or drag and drop images and files directly into the chat composer.

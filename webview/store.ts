@@ -41,6 +41,7 @@ export interface State {
   currentSession: SessionSummary | null;
   messages: ChatMessage[];
   todos: TodoItem[];
+  images: Record<string, string>;
   permissions: PermissionRequest[];
   questions: QuestionRequest[];
   status: SessionStatus;
@@ -85,6 +86,7 @@ export const initialState: State = {
   currentSession: null,
   messages: [],
   todos: [],
+  images: {},
   permissions: [],
   questions: [],
   status: { type: "idle" },
@@ -461,6 +463,8 @@ function reduceHost(state: State, message: HostMessage): State {
       return { ...state, questions: message.payload.requests };
     case "todos":
       return { ...state, todos: message.payload.todos };
+    case "imagePreview":
+      return { ...state, images: { ...state.images, [message.payload.path]: message.payload.data } };
     case "diff":
       return { ...state, diffFiles: message.payload.files, diffOpen: true };
     case "draft": {

@@ -1,7 +1,8 @@
+import { useState } from "preact/hooks";
 import type { Attachment, FilePart } from "../../src/shared/types";
 import { useApp } from "../context";
 import { basename } from "../format";
-import { Icon, IconButton } from "./ui";
+import { Icon, IconButton, Lightbox } from "./ui";
 
 export function AttachmentChip({
   attachment,
@@ -11,7 +12,8 @@ export function AttachmentChip({
   onRemove?: (id: string) => void;
 }) {
   const { t, post } = useApp();
-  const isImage = attachment.kind === "image" && attachment.preview;
+  const [zoom, setZoom] = useState(false);
+  const isImage = attachment.kind === "image" && Boolean(attachment.preview);
   const label =
     attachment.kind === "selection"
       ? `${basename(attachment.path || attachment.name)} · ${attachment.range?.start}-${attachment.range?.end}`
@@ -20,7 +22,15 @@ export function AttachmentChip({
   return (
     <div class={`attachment ${isImage ? "attachment-image" : ""}`} title={attachment.path || attachment.name}>
       {isImage ? (
-        <img class="attachment-thumb" src={attachment.preview} alt="" />
+        <button
+          type="button"
+          class="attachment-thumb-btn"
+          aria-label={t("image.preview")}
+          title={t("image.preview")}
+          onClick={() => setZoom(true)}
+        >
+          <img class="attachment-thumb" src={attachment.preview} alt={label} />
+        </button>
       ) : (
         <span class="attachment-icon">
           <Icon name={attachment.kind === "selection" ? "code" : attachment.kind === "image" ? "image" : "file"} size={15} />
@@ -36,7 +46,7 @@ export function AttachmentChip({
               : (attachment.mime || t("composer.files")).replace("text/", "")}
         </span>
       </span>
-      {attachment.path && !onRemove ? (
+      {attachment.path && !onRemove && !isImage ? (
         <button
           type="button"
           class="attachment-open"
@@ -55,27 +65,48 @@ export function AttachmentChip({
           onClick={() => onRemove(attachment.id)}
         />
       ) : null}
+      {zoom && attachment.preview ? (
+        <Lightbox src={attachment.preview} alt={label} onClose={() => setZoom(false)} />
+      ) : null}
     </div>
   );
 }
 
 export function FilePartChip({ part }: { part: FilePart }) {
-  const { t, post } = useApp();
+  const { state, t, post } = useApp();
+  const [zoom, setZoom] = useState(false);
   const name = part.filename || basename(part.url || "");
-  const isImage = (part.mime || "").startsWith("image/");
+  const rawUrl = part.url || "";
+  const dataUrl = rawUrl.startsWith("data:") ? rawUrl : "";
+  let path = "";
+  if (rawUrl.startsWith("file:")) {
+    const raw = rawUrl.replace(/^file:\/\//, "");
+    try {
+      path = decodeURIComponent(raw);
+    } catch {
+      path = raw;
+    }
+  }
+  const isImage = (part.mime || "").startsWith("image/") && Boolean(path || dataUrl);
+  const src = dataUrl || (path ? state.images[path] : undefined);
+
+  const open = () => {
+    if (isImage) {
+      setZoom(true);
+      if (!dataUrl && path && state.images[path] === undefined) post({ type: "previewImage", path });
+      return;
+    }
+    if (path) post({ type: "openFile", path });
+  };
+
   return (
-    <button
-      type="button"
-      class="file-chip"
-      onClick={() => {
-        const path = decodeURIComponent((part.url || "").replace(/^file:\/\//, ""));
-        if (path) post({ type: "openFile", path });
-      }}
-      title={part.url}
-    >
-      <Icon name={isImage ? "image" : "file"} size={14} />
-      <span>{name}</span>
-      <span class="file-chip-meta">{t("message.attached")}</span>
-    </button>
+    <>
+      <button type="button" class="file-chip" onClick={open} title={isImage ? t("image.preview") : part.url}>
+        <Icon name={isImage ? "image" : "file"} size={14} />
+        <span>{name}</span>
+        <span class="file-chip-meta">{t("message.attached")}</span>
+      </button>
+      {zoom ? <Lightbox src={isImage ? src : undefined} alt={name} onClose={() => setZoom(false)} /> : null}
+    </>
   );
 }
